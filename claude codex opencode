@@ -1,0 +1,39 @@
+
+### Agents
+
+| Agent | Provider | Role | Tools |
+| :--- | :--- | :--- | :--- |
+| @sol-triager | Claude Code | Investigator | read, grep, log_query |
+| @sol-fixer | Codex | Proposer | write, branch, commit |
+| @sol-verifier | OpenCode | Verifier | test_run only |
+
+### How It Works - Real Workflow
+
+1.  **Human:** `@sol-triager investigate login fails on /api/login`
+2.  **Triager:** Posts root cause + files: `auth.js:42, token expired`
+3.  **Human:** `@sol-fixer propose fix for #123`
+4.  **Fixer:** Creates branch `fix/login-123`, posts diff, asks for approval. CANNOT merge.
+5.  **Human:** `@sol-verifier verify fix/login-123`
+6.  **Verifier:** Runs `npm test`, posts receipt: `12/12 tests passed`
+7.  **Human:** `approve` -> Only then merge is allowed.
+
+### Setup - Run in 10 Mins
+
+```bash
+# 1. Install Switch
+curl -fsSL https://get.switch.sh | sh
+
+# 2. Clone this repo
+git clone https://github.com/YOUR-USERNAME/sol-connect-switch-workflow
+cd sol-connect-switch-workflow
+
+# 3. Create room (Discord bridge)
+switch room create sol-connect-room --bridge discord
+
+# 4. Add agents
+switch agent add sol-triager --provider claude-code
+switch agent add sol-fixer --provider codex
+switch agent add sol-verifier --provider opencode
+
+# 5. Launch
+switch launch --config switch.yaml
