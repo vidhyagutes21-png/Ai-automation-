@@ -1,0 +1,167 @@
+ `README.md`
+# Sol Connect — AI Agents as Real Teammates in Discord via Switch
+
+**Flip the Switch Hackathon | WeMakeDevs × DevTools Academy**
+**Track: Best Business Workflow**
+**Team: Solo | Vignesh**
+
+### The Problem
+AI agents like Claude Code, Cursor, Codex live alone on one laptop.
+Your team can't see them, can't talk to them, can't approve their work.
+During a bug, everyone is asking "who is fixing it?" in chat, while the AI is fixing it silently somewhere else.
+
+### The Solution: Sol Connect
+Sol Connect uses **Switch** to turn local CLI agents into real teammates in Discord.
+
+Human asks in Discord -> Switch Room routes it -> Local Agent does work -> Posts proof back in Discord.
+
+One AI is NOT allowed to do everything. We use Separation of Duties:
+Proposer cannot Verify. Human must Approve.
+
+### Architecture
+
+---
+
+### 1. Your http://README.md — Copy This
+# Sol Connect — AI Agents as Real Teammates in Discord via Switch
+
+**Flip the Switch Hackathon | WeMakeDevs × DevTools Academy**
+**Track: Best Business Workflow**
+**Team: Solo | Vignesh**
+
+### The Problem
+AI agents like Claude Code, Cursor, Codex live alone on one laptop.
+Your team can't see them, can't talk to them, can't approve their work.
+During a bug, everyone is asking "who is fixing it?" in chat, while the AI is fixing it silently somewhere else.
+
+### The Solution: Sol Connect
+Sol Connect uses **Switch** to turn local CLI agents into real teammates in Discord.
+
+Human asks in Discord -> Switch Room routes it -> Local Agent does work -> Posts proof back in Discord.
+
+One AI is NOT allowed to do everything. We use Separation of Duties:
+Proposer cannot Verify. Human must Approve.
+
+### Architecture
+Human (Discord #sol-connect)
+      |
+      v
+[ Switch Room: sol-connect-room ]  <-- Shared Log, Avatars, Permissions
+      |
+      v
+[ Agent Host - Runs 100% Locally ] <-- Secrets stay local, never in LLM prompt
+      |
+  +---+---+---+
+  |   |   |
+Triager Fixer Verifier
+Claude  Codex OpenCode
+
+### Agents
+
+| Agent | Provider | Role | Tools |
+| :--- | :--- | :--- | :--- |
+| @sol-triager | Claude Code | Investigator | read, grep, log_query |
+| @sol-fixer | Codex | Proposer | write, branch, commit |
+| @sol-verifier | OpenCode | Verifier | test_run only |
+
+### How It Works - Real Workflow
+
+1.  **Human:** `@sol-triager investigate login fails on /api/login`
+2.  **Triager:** Posts root cause + files: `auth.js:42, token expired`
+3.  **Human:** `@sol-fixer propose fix for #123`
+4.  **Fixer:** Creates branch `fix/login-123`, posts diff, asks for approval. CANNOT merge.
+5.  **Human:** `@sol-verifier verify fix/login-123`
+6.  **Verifier:** Runs `npm test`, posts receipt: `12/12 tests passed`
+7.  **Human:** `approve` -> Only then merge is allowed.
+
+### Setup - Run in 10 Mins
+
+```bash
+# 1. Install Switch
+curl -fsSL https://get.switch.sh | sh
+
+# 2. Clone this repo
+git clone https://github.com/YOUR-USERNAME/sol-connect-switch-workflow
+cd sol-connect-switch-workflow
+
+# 3. Create room (Discord bridge)
+switch room create sol-connect-room --bridge discord
+
+# 4. Add agents
+switch agent add sol-triager --provider claude-code
+switch agent add sol-fixer --provider codex
+switch agent add sol-verifier --provider opencode
+
+# 5. Launch
+switch launch --config switch.yaml
+### Files in this Repo
+- `switch.yaml` - Room + Agent definitions
+- `agent_host.js` - Secure local broker
+- `demo/` - 2-min demo video + screenshots
+
+### Why Switch?
+Without Switch, we'd have to build Slack bots, webhooks, auth, and permission system from scratch. Switch gives us Rooms, Avatars, and Human-in-the-Loop for free. We focus only on the workflow.
+
+### Demo Video
+https://your-video-link
+
+### Future Scope
+Add Antigravity agent for UI fixes, add Teams bridge, add voice via Wispr Flow.
+
+Built with ❤️ for Flip the Switch Hackathon
+#HowISwitch #WeMakeDevs
+
+### 2. Your switch.yaml — Copy This
+
+```yaml
+name: sol-connect-room
+bridges:
+    - discord: "#sol-connect"
+
+agents:
+    - name: sol-triager
+    provider: claude-code
+    role: Investigator
+    system_prompt: "You are triager. Only read-only tools. Investigate bugs and post findings. Never write code."
+    tools: [read, grep, log_query]
+    - name: sol-fixer
+    provider: codex
+    role: Fixer
+    system_prompt: "You are fixer. Propose fix in isolated branch. Output diff and ask human approval. You cannot merge."
+    tools: [write, branch, commit]
+    requires_approval: true
+    - name: sol-verifier
+    provider: opencode
+    role: Verifier
+    system_prompt: "You cannot write code. You only verify. Run tests, post receipt. If tests fail, block merge."
+    tools: [test_run, proof]
+
+rooms:
+    - name: war-room
+    agents: [sol-triager, sol-fixer, sol-verifier]
+    rules: "Proposer cannot verify. Human approval mandatory."
+### 3. Your Submission Post for #HowISwitch (For Keyboard Prize)
+
+Post this on X / LinkedIn / http://dev.to:
+
+> I built Sol Connect for #FlipTheSwitch Hackathon!
+>
+> Solo AI agents are lonely. I used Switch to turn Claude Code, Codex & OpenCode into real teammates in Discord.
+>
+> Triager finds bug -> Fixer proposes fix -> Verifier runs tests -> Human approves.
+>
+> No one agent can do it all. That's how real teams work.
+>
+> Repo: [your link]
+> #HowISwitch #WeMakeDevs #AIAgents
+
+---
+
+*What to do now in order:*
+
+1. Create GitHub repo named `sol-connect-switch-workflow`
+2. Paste README + http://switch.yaml above
+3. Record 2-min screen recording: Show Discord -> type `@sol-triager investigate` -> show agent reply (even if simulated with your local Claude Code, it's valid for demo)
+4. Submit form before 11:59 PM IST + post the #HowISwitch post
+
+Want me to write your *dev.to Blog* next for the AirPods 5 prize? Say *"Blog"* and I'll give you the full 800-word blog ready to paste.
