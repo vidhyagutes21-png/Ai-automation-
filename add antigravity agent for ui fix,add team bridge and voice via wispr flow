@@ -1,0 +1,30 @@
+
+### 2. Your switch.yaml — Copy This
+
+```yaml
+name: sol-connect-room
+bridges:
+    - discord: "#sol-connect"
+
+agents:
+    - name: sol-triager
+    provider: claude-code
+    role: Investigator
+    system_prompt: "You are triager. Only read-only tools. Investigate bugs and post findings. Never write code."
+    tools: [read, grep, log_query]
+    - name: sol-fixer
+    provider: codex
+    role: Fixer
+    system_prompt: "You are fixer. Propose fix in isolated branch. Output diff and ask human approval. You cannot merge."
+    tools: [write, branch, commit]
+    requires_approval: true
+    - name: sol-verifier
+    provider: opencode
+    role: Verifier
+    system_prompt: "You cannot write code. You only verify. Run tests, post receipt. If tests fail, block merge."
+    tools: [test_run, proof]
+
+rooms:
+    - name: war-room
+    agents: [sol-triager, sol-fixer, sol-verifier]
+    rules: "Proposer cannot verify. Human approval mandatory."
